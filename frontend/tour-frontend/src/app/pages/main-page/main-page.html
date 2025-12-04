@@ -1,4 +1,18 @@
-<div>
-  <app-cesium-component></app-cesium-component>
-  <app-widget-component></app-widget-component>
+<div class="main-container">
+  <!-- Fullscreen globe -->
+  <app-cesium-component
+    class="globe"
+    [objects]="objects"
+    (objectSelected)="onObjectSelected($event)"
+  >
+  </app-cesium-component>
+
+  <!-- Fullscreen invisible overlay that contains islands -->
+  <app-widget-component
+    class="overlay"
+    [events]="eventList"
+    (search)="onSearch($event)"
+    (selectEvent)="flyToEvent($event)"
+  >
+  </app-widget-component>
 </div>

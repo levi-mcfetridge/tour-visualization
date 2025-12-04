@@ -35,10 +35,10 @@ app.MapGet("/api/ping", () => new { ok = true, msg = "pong" })
 
 // ---------------- Ticketmaster proxy with explicit query params ----------------
 app.MapGet("/api/events", async (
-        HttpContext ctx, //gives access to request and cancellation token
-        IHttpClientFactory http, // create http client instance
-        IConfiguration cfg, //reads config values
-        [AsParameters] EventsQuery q // the main magic that binds multiple query strings
+        HttpContext ctx,               // gives access to request and cancellation token
+        IHttpClientFactory http,       // create http client instance
+        IConfiguration cfg,            // reads config values
+        [AsParameters] EventsQuery q   // binds query string to record
     ) =>
 {
     var apiKey = cfg["TM_API_KEY"];
@@ -47,13 +47,19 @@ app.MapGet("/api/events", async (
 
     // Build a TM query dictionary with only non-empty values
     var query = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-    void Add(string key, string? val) { if (!string.IsNullOrWhiteSpace(val)) query[key] = val; }
+    void Add(string key, string? val)
+    {
+        if (!string.IsNullOrWhiteSpace(val))
+            query[key] = val;
+    }
 
     Add("keyword",            q.keyword);
     Add("countryCode",        q.countryCode);
     Add("city",               q.city);
     Add("stateCode",          q.stateCode);
-    Add("classificationName", q.classificationName);
+    Add("classificationName", q.classificationName);  // e.g. "music"
+    Add("attractionId",       q.attractionId);        // 🎵 artist filter
+
     if (q.size is int s) query["size"] = s.ToString();
     if (q.page is int p) query["page"] = p.ToString();
     Add("sort",               q.sort);
@@ -61,13 +67,21 @@ app.MapGet("/api/events", async (
     // Always add your API key
     query["apikey"] = apiKey;
 
-    var url  = QueryHelpers.AddQueryString(
+    var url = QueryHelpers.AddQueryString(
         "https://app.ticketmaster.com/discovery/v2/events.json",
         query
     );
 
-    var json = await http.CreateClient().GetStringAsync(url, ctx.RequestAborted);
-    return Results.Content(json, "application/json");
+    try
+    {
+        var json = await http.CreateClient().GetStringAsync(url, ctx.RequestAborted);
+        return Results.Content(json, "application/json");
+    }
+    catch (HttpRequestException ex)
+    {
+        // This avoids a totally opaque 500 and lets you see what's wrong in Network tab
+        return Results.Problem($"Ticketmaster error: {ex.Message}", statusCode: 502);
+    }
 })
 .WithOpenApi();
 
@@ -80,6 +94,7 @@ public record EventsQuery(
     string? city,
     string? stateCode,
     string? classificationName,
+    string? attractionId,   // 🔹 new
     int?    size,
     int?    page,
     string? sort

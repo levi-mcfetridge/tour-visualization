@@ -1,1 +1,48 @@
-<p>widget-component works!</p>
+<!-- SEARCH PANEL -->
+<div class="search-container">
+  <h3>Search Events</h3>
+
+  <input
+    type="text"
+    [ngModel]="keyword"
+    (ngModelChange)="onKeywordChange($event)"
+    placeholder="Search artist..."
+  />
+
+  <!-- AUTOCOMPLETE DROPDOWN -->
+  <ul class="suggestions" *ngIf="suggestions.length > 0">
+    <li *ngFor="let s of suggestions" (click)="applySuggestion(s)">
+      {{ s.name }}
+    </li>
+  </ul>
+
+  <!-- <button (click)="doSearch()">Search</button> -->
+</div>
+
+<!-- EVENT LIST -->
+<div class="event-list" *ngIf="events.length > 0">
+  <h3>Events</h3>
+  <ul>
+    <li *ngFor="let e of events" (click)="onSelectEvent(e)">
+      <div class="title">{{ e.name }}</div>
+      <div class="venue">{{ e.venue }}</div>
+      <div class="date">{{ e.date }}</div>
+    </li>
+  </ul>
+</div>
+
+<!-- EVENT POPUP CARD -->
+<div class="event-popup" *ngIf="selectedEvent">
+  <button class="close-btn" (click)="selectedEvent = null">✕</button>
+
+  <!-- ADD THIS -->
+  <img class="hero" [src]="selectedEvent.image" alt="event" />
+
+  <h2>{{ selectedEvent.name }}</h2>
+
+  <div class="meta">
+    <div><strong>City:</strong> {{ selectedEvent.city }}</div>
+    <div><strong>Venue:</strong> {{ selectedEvent.venue }}</div>
+    <div><strong>Date:</strong> {{ selectedEvent.date }}</div>
+  </div>
+</div>
