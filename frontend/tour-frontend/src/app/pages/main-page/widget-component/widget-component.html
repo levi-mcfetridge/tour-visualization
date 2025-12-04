@@ -2,21 +2,36 @@
 <div class="search-container">
   <h3>Search Events</h3>
 
-  <input
-    type="text"
-    [ngModel]="keyword"
-    (ngModelChange)="onKeywordChange($event)"
-    placeholder="Search artist..."
-  />
+  <!-- AUTOCOMPLETE WRAPPER -->
+  <div class="autocomplete-wrapper">
+    <input
+      type="text"
+      [ngModel]="keyword"
+      (ngModelChange)="onKeywordChange($event)"
+      placeholder="Search artist..."
+    />
 
-  <!-- AUTOCOMPLETE DROPDOWN -->
-  <ul class="suggestions" *ngIf="suggestions.length > 0">
-    <li *ngFor="let s of suggestions" (click)="applySuggestion(s)">
-      {{ s.name }}
-    </li>
-  </ul>
+    <!-- AUTOCOMPLETE DROPDOWN -->
+    <ul class="suggestions" *ngIf="suggestions.length > 0">
+      <li *ngFor="let s of suggestions" (click)="applySuggestion(s)">
+        {{ s.name }}
+      </li>
+    </ul>
+  </div>
 
-  <!-- <button (click)="doSearch()">Search</button> -->
+  <!-- CITY FILTER -->
+  <label>City (optional)</label>
+  <input type="text" [(ngModel)]="city" placeholder="Enter city..." />
+
+  <!-- DATE RANGE FILTER -->
+  <label>Date Range</label>
+  <div class="date-row">
+    <input type="date" [(ngModel)]="startDate" />
+    <input type="date" [(ngModel)]="endDate" />
+  </div>
+
+  <!-- SEARCH BUTTON -->
+  <button class="search-btn" (click)="doSearch()">Search</button>
 </div>
 
 <!-- EVENT LIST -->
@@ -35,7 +50,6 @@
 <div class="event-popup" *ngIf="selectedEvent">
   <button class="close-btn" (click)="selectedEvent = null">✕</button>
 
-  <!-- ADD THIS -->
   <img class="hero" [src]="selectedEvent.image" alt="event" />
 
   <h2>{{ selectedEvent.name }}</h2>

@@ -19,12 +19,7 @@
 
   width: 100vw;
   height: 100vh;
-
-  /* NO BACKGROUND - must be transparent */
   background: transparent;
-
-  /* Let Cesium get clicks unless a panel handles them */
   pointer-events: none;
-
   z-index: 100;
 }

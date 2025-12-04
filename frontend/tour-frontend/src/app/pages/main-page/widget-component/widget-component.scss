@@ -8,6 +8,7 @@
   z-index: 2000;
 }
 
+/* SHARED PANEL STYLE */
 .search-container,
 .event-list,
 .event-popup {
@@ -25,22 +26,29 @@
   top: 20px;
   left: 20px;
   width: 350px;
-  z-index: 5000; /* above everything */
-  position: relative;
+  z-index: 5000;
+}
+
+/* AUTOCOMPLETE WRAPPER */
+.autocomplete-wrapper {
+  position: relative; /* dropdown anchors correctly here */
 }
 
 /* DROPDOWN */
 .suggestions {
   position: absolute;
-  top: 60px;
+  top: 100%; /* sits exactly under the input */
   left: 0;
   width: 100%;
   background: white;
   border-radius: 8px;
-  z-index: 9999 !important;
-  max-height: 250px;
+  max-height: 220px;
   overflow-y: auto;
   border: 1px solid #ccc;
+  z-index: 9999;
+  list-style: none;
+  padding: 0;
+  margin-top: 100px; /* small gap for clarity */
 }
 
 .suggestions li {
@@ -54,10 +62,10 @@
 
 /* EVENT LIST */
 .event-list {
-  top: 140px;
+  top: 430px; /* moved lower so filters don't overlap */
   left: 20px;
   width: 350px;
-  max-height: 70vh;
+  max-height: 55vh;
   overflow-y: auto;
   z-index: 3000;
 }

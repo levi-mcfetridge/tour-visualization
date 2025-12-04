@@ -23,17 +23,29 @@ export class WidgetComponent {
       INPUT + OUTPUT
   -------------------------*/
   @Input() events: any[] = [];
-  @Output() search = new EventEmitter<{ artistId?: string; artistName: string }>();
+
+  @Output() search = new EventEmitter<{
+    artistId?: string;
+    artistName: string;
+    city?: string;
+    startDate?: string;
+    endDate?: string;
+  }>();
+
   @Output() selectEvent = new EventEmitter<any>();
 
   /* ------------------------
       STATE
   -------------------------*/
   keyword = '';
+  city = '';
+  radiusMiles?: number;
+  startDate?: string;
+  endDate?: string;
+
   suggestions: ArtistSuggestion[] = [];
   selectedEvent: any = null;
 
-  /* Stream for debounced search */
   private inputChanged$ = new Subject<string>();
 
   constructor(private eventsService: EventsService) {
@@ -49,7 +61,7 @@ export class WidgetComponent {
   }
 
   /* ------------------------
-      AUTOCOMPLETE HANDLERS
+      AUTOCOMPLETE LOGIC
   -------------------------*/
   onKeywordChange(value: string) {
     this.keyword = value;
@@ -59,26 +71,46 @@ export class WidgetComponent {
   applySuggestion(artist: ArtistSuggestion) {
     this.keyword = artist.name;
     this.suggestions = [];
-    this.selectedEvent = null; // <-- closes popup immediately
+    this.selectedEvent = null;
 
     this.search.emit({
       artistId: artist.id,
       artistName: artist.name,
+      city: this.city,
+      startDate: this.startDate,
+      endDate: this.endDate,
     });
   }
 
   /* ------------------------
-      MANUAL SEARCH BUTTON
+      MANUAL SEARCH
   -------------------------*/
   doSearch() {
     this.suggestions = [];
-    this.search.emit({
-      artistName: this.keyword,
+    this.selectedEvent = null;
+
+    // First: get artistId from keyword
+    this.eventsService.getArtistSuggestions(this.keyword).subscribe((artists) => {
+      if (artists.length === 0) {
+        console.warn('No artists match keyword:', this.keyword);
+        return;
+      }
+
+      // Pick the first (best match)
+      const artist = artists[0];
+
+      this.search.emit({
+        artistId: artist.id,
+        artistName: artist.name,
+        city: this.city,
+        startDate: this.startDate,
+        endDate: this.endDate,
+      });
     });
   }
 
   /* ------------------------
-      EVENT LIST CLICKS
+      EVENT SELECTION
   -------------------------*/
   onSelectEvent(event: any) {
     this.selectedEvent = {

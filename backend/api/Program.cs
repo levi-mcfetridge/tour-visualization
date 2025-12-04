@@ -30,41 +30,45 @@ if (app.Environment.IsDevelopment())
 }
 
 // ---------------- Health check ----------------
-app.MapGet("/api/ping", () => new { ok = true, msg = "pong" })
-   .WithOpenApi();
+app.MapGet("/api/ping", () => new { ok = true, msg = "pong" }).WithOpenApi();
 
 // ---------------- Ticketmaster proxy with explicit query params ----------------
 app.MapGet("/api/events", async (
-        HttpContext ctx,               // gives access to request and cancellation token
-        IHttpClientFactory http,       // create http client instance
-        IConfiguration cfg,            // reads config values
-        [AsParameters] EventsQuery q   // binds query string to record
+        HttpContext ctx,
+        IHttpClientFactory http,
+        IConfiguration cfg,
+        [AsParameters] EventsQuery q
     ) =>
 {
     var apiKey = cfg["TM_API_KEY"];
     if (string.IsNullOrWhiteSpace(apiKey))
         return Results.Problem("TM_API_KEY not configured.");
 
-    // Build a TM query dictionary with only non-empty values
     var query = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
     void Add(string key, string? val)
     {
         if (!string.IsNullOrWhiteSpace(val))
             query[key] = val;
     }
 
+    // ---- Forwarded fields ----
     Add("keyword",            q.keyword);
-    Add("countryCode",        q.countryCode);
     Add("city",               q.city);
     Add("stateCode",          q.stateCode);
-    Add("classificationName", q.classificationName);  // e.g. "music"
-    Add("attractionId",       q.attractionId);        // 🎵 artist filter
+    Add("countryCode",        q.countryCode);
+    Add("classificationName", q.classificationName);
+    Add("attractionId",       q.attractionId);
 
     if (q.size is int s) query["size"] = s.ToString();
     if (q.page is int p) query["page"] = p.ToString();
-    Add("sort",               q.sort);
+    Add("sort", q.sort);
 
-    // Always add your API key
+    // ---- NEW: date range support ----
+    Add("startDateTime", q.startDateTime);
+    Add("endDateTime",   q.endDateTime);
+
+    // ---- Mandatory API key ----
     query["apikey"] = apiKey;
 
     var url = QueryHelpers.AddQueryString(
@@ -79,7 +83,6 @@ app.MapGet("/api/events", async (
     }
     catch (HttpRequestException ex)
     {
-        // This avoids a totally opaque 500 and lets you see what's wrong in Network tab
         return Results.Problem($"Ticketmaster error: {ex.Message}", statusCode: 502);
     }
 })
@@ -94,8 +97,11 @@ public record EventsQuery(
     string? city,
     string? stateCode,
     string? classificationName,
-    string? attractionId,   // 🔹 new
+    string? attractionId,
     int?    size,
     int?    page,
-    string? sort
+    string? sort,
+    string? startDateTime,
+    string? endDateTime
 );
+

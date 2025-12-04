@@ -136,16 +136,27 @@ export class CesiumComponent implements AfterViewInit, OnDestroy {
         id: o.id,
         name: o.label,
         position: o.position,
-        point: { pixelSize: 10, color: Cesium.Color.YELLOW },
+
+        point: {
+          pixelSize: 10,
+          color: Cesium.Color.YELLOW,
+        },
+
         label: {
           text: o.label,
-          font: "14px 'Roboto', sans-serif",
+          font: "18px 'Roboto', sans-serif",
           fillColor: Cesium.Color.WHITE,
           outlineColor: Cesium.Color.BLACK,
-          outlineWidth: 2,
+          outlineWidth: 4,
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+
+          showBackground: true,
+          backgroundColor: new Cesium.Color(0, 0, 0, 0.55),
+          backgroundPadding: new Cesium.Cartesian2(10, 6),
+
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
           verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-          pixelOffset: new Cesium.Cartesian2(0, -25),
+          pixelOffset: new Cesium.Cartesian2(0, -20),
         },
       });
     }
