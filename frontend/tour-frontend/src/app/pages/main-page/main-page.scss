@@ -1,0 +1,25 @@
+.main-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.globe {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* This is CRITICAL: widget overlay covers whole screen */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  pointer-events: none;
+  z-index: 100;
+}
